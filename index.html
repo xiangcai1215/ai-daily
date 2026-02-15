@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>AI 每日速递 🤖</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", sans-serif;
+            background: #f5f7fa;
+            padding-bottom: 80px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .header .date {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .container {
+            padding: 15px;
+        }
+        
+        .category {
+            margin-bottom: 20px;
+        }
+        
+        .category-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            padding-left: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .card:active {
+            transform: scale(0.98);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        }
+        
+        .card-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+        
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .card-desc {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .card-source {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .card-time {
+            color: #999;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .refresh-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            border: none;
+            color: white;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .refresh-btn:active {
+            transform: scale(0.9);
+        }
+        
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+        
+        .empty-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 AI 每日速递</h1>
+        <div class="date" id="currentDate"></div>
+    </div>
+    
+    <div class="container" id="content">
+        <div class="loading">
+            <div class="loading-spinner"></div>
+            <div>正在加载最新资讯...</div>
+        </div>
+    </div>
+    
+    <button class="refresh-btn" onclick="loadNews()">🔄</button>
+    
+    <script>
+        // 模拟数据 - 实际使用时从API获取
+        const mockData = {
+            products: [
+                {
+                    title: "OpenAI 发布 GPT-5 预览版",
+                    desc: "性能提升 40%，支持更长上下文窗口，多模态能力大幅增强",
+                    source: "OpenAI",
+                    time: "2小时前"
+                },
+                {
+                    title: "Google Gemini 2.0 正式上线",
+                    desc: "推理速度提升 3 倍，支持实时语音对话和视频理解",
+                    source: "Google",
+                    time: "5小时前"
+                }
+            ],
+            research: [
+                {
+                    title: "斯坦福发布新型 Transformer 架构",
+                    desc: "计算效率提升 10 倍，在长文本任务上表现优异",
+                    source: "Stanford",
+                    time: "8小时前"
+                },
+                {
+                    title: "MIT 突破性神经网络压缩技术",
+                    desc: "模型体积减少 90% 同时保持精度，适合边缘设备部署",
+                    source: "MIT",
+                    time: "12小时前"
+                }
+            ],
+            industry: [
+                {
+                    title: "微软投资 100 亿美元建设 AI 数据中心",
+                    desc: "计划在全球新建 20 个超大规模数据中心，支持 AI 训练和推理",
+                    source: "Bloomberg",
+                    time: "6小时前"
+                },
+                {
+                    title: "Anthropic 完成 45 亿美元 D 轮融资",
+                    desc: "估值达 180 亿美元，将用于 Claude 系列模型研发",
+                    source: "TechCrunch",
+                    time: "10小时前"
+                }
+            ]
+        };
+        
+        const categories = {
+            products: { title: "🚀 新品发布", badge: "产品" },
+            research: { title: "🔬 研究突破", badge: "研究" },
+            industry: { title: "💼 行业动态", badge: "动态" }
+        };
+        
+        function formatDate() {
+            const now = new Date();
+            const days = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            const month = now.getMonth() + 1;
+            const date = now.getDate();
+            const day = days[now.getDay()];
+            return `${month}月${date}日 ${day}`;
+        }
+        
+        function renderNews() {
+            const content = document.getElementById('content');
+            let html = '';
+            
+            for (const [key, items] of Object.entries(mockData)) {
+                const cat = categories[key];
+                html += `
+                    <div class="category">
+                        <div class="category-title">${cat.title}</div>
+                `;
+                
+                items.forEach(item => {
+                    html += `
+                        <div class="card">
+                            <span class="card-badge">${cat.badge}</span>
+                            <div class="card-title">${item.title}</div>
+                            <div class="card-desc">${item.desc}</div>
+                            <div class="card-meta">
+                                <span class="card-source">📰 ${item.source}</span>
+                                <span class="card-time">${item.time}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+            }
+            
+            content.innerHTML = html;
+        }
+        
+        function loadNews() {
+            const content = document.getElementById('content');
+            content.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <div>正在刷新...</div>
+                </div>
+            `;
+            
+            // 模拟加载延迟
+            setTimeout(() => {
+                renderNews();
+            }, 800);
+        }
+        
+        // 初始化
+        document.getElementById('currentDate').textContent = formatDate();
+        
+        // 页面加载完成后显示内容
+        setTimeout(() => {
+            renderNews();
+        }, 1000);
+        
+        // 添加下拉刷新支持
+        let startY = 0;
+        let isPulling = false;
+        
+        document.addEventListener('touchstart', (e) => {
+            if (window.scrollY === 0) {
+                startY = e.touches[0].pageY;
+                isPulling = true;
+            }
+        });
+        
+        document.addEventListener('touchmove', (e) => {
+            if (isPulling && window.scrollY === 0) {
+                const currentY = e.touches[0].pageY;
+                if (currentY - startY > 80) {
+                    loadNews();
+                    isPulling = false;
+                }
+            }
+        });
+        
+        document.addEventListener('touchend', () => {
+            isPulling = false;
+        });
+    </script>
+</body>
+</html>
